@@ -36,6 +36,8 @@ class AppConstants {
       "/api/v1/candidateresource/update/candidate/"; //api/v1/candidateresource/update/candidate/{candidateId}}/education;
   static String DELETE_EDUCATION =
       "/api/v1/candidateresource/delete/candidate/education/";
+       static String DELETE_EDUCATION1 =
+      "/api/v1/candidateresource/delete/candidate/education/";
 
   ///api/v1/candidateresource/delete/candidate/education/{education_id};
 
