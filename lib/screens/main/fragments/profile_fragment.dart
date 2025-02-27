@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -7,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talent_turbo_new/AppColors.dart';
 import 'package:talent_turbo_new/Utils.dart';
 import 'package:talent_turbo_new/models/candidate_profile_model.dart';
@@ -65,103 +63,87 @@ class _ProfileFragmentState extends State<ProfileFragment> {
     }
   }
 
- void showDeleteConfirmationDialog(BuildContext context, bool isConnectionAvailable) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
-        actionsPadding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-        contentPadding: EdgeInsets.fromLTRB(22, 15, 15, 22),
-        title: Text(
-          'Logout',
-          style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff333333)),
-        ),
-        content: Container(
-          width: MediaQuery.of(context).size.width,
-          child: Text(
-            'Are you sure you want to log out?',
+  void showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          actionsPadding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+          contentPadding: EdgeInsets.fromLTRB(22, 15, 15, 22),
+          title: Text(
+            'Logout',
             style: TextStyle(
-                height: 1.2,
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
                 color: Color(0xff333333)),
           ),
-        ),
-        actions: [
-          InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Container(
-              height: 40,
-              width: 100,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(width: 1, color: AppColors.primaryColor),
-                  borderRadius: BorderRadius.circular(7)),
-              child: Center(
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: AppColors.primaryColor),
-                ),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () async {
-              if (!isConnectionAvailable) {
+          content: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Are you sure you want to log out?',
+                style: TextStyle(
+                    height: 0.5,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xff333333)),
+              )),
+          actions: [
+            InkWell(
+              onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('No internet connection. Please try again later.'),
-                    backgroundColor: Colors.red,
+              },
+              child: Container(
+                height: 40,
+                width: 100,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(width: 1, color: AppColors.primaryColor),
+                    borderRadius: BorderRadius.circular(7)),
+                child: Center(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.primaryColor),
                   ),
-                );
-                return;
-              }
-
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.clear();  // Clears all stored data
-
-              await _googleAuthService.signOut();
-
-              // Ensure UI updates before navigating
-              (context as Element).markNeedsBuild();
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-                (Route<dynamic> route) => false,
-              );
-            },
-            child: Container(
-              height: 40,
-              width: 100,
-              decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(7)),
-              child: Center(
-                child: Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
+            InkWell(
+              onTap: () async {
+                UserCredentials credentials =
+                    UserCredentials(username: '', password: '');
 
+                await credentials.deleteCredentials();
+                await _googleAuthService.signOut();
 
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (Route<dynamic> route) => false, // This will keep Screen 1
+                );
+              },
+              child: Container(
+                height: 40,
+                width: 100,
+                decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(7)),
+                child: Center(
+                  child: Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
 
   final String appUrl =
       "https://play.google.com/store/apps/details?id=com.android.referral.talentturbo";
@@ -508,7 +490,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                             Divider(),
                             ListTile(
                               onTap: () {
-                                showDeleteConfirmationDialog(context,isConnectionAvailable);
+                                showDeleteConfirmationDialog(context);
                               },
                               leading: Container(
                                 width: 40,
@@ -612,38 +594,12 @@ class _ProfileFragmentState extends State<ProfileFragment> {
     });
   }
 
-late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
-
-@override
-void initState() {
-  super.initState();
-  fetchProfileFromPref();
-  checkInternetAvailability();
-
-  _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
-    setState(() {
-      isConnectionAvailable = results.contains(ConnectivityResult.mobile) || results.contains(ConnectivityResult.wifi);
-    });
-
-    if (!isConnectionAvailable) {
-      IconSnackBar.show(
-        context,
-        label: 'No internet connection',
-        snackBarType: SnackBarType.alert,
-        backgroundColor: Color(0xff2D2D2D),
-        iconColor: Colors.white,
-      );
-    }
-  });
-}
-
-@override
-void dispose() {
-  _connectivitySubscription.cancel();
-  super.dispose();
-}
-
-
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchProfileFromPref();
+    checkInternetAvailability();
+  }
 
   Future<void> checkInternetAvailability() async {
     var connectivityResult = await Connectivity().checkConnectivity();

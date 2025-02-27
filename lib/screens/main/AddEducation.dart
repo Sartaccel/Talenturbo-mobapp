@@ -16,6 +16,7 @@ import 'package:talent_turbo_new/models/candidate_profile_model.dart';
 import 'package:talent_turbo_new/models/referral_profile_model.dart';
 import 'package:talent_turbo_new/models/user_data_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:talent_turbo_new/screens/main/personal_details.dart';
 
 class Addeducation extends StatefulWidget {
   final educationDetail;
@@ -154,8 +155,8 @@ class _AddeducationState extends State<Addeducation> {
           backgroundColor: Color(0xff2D2D2D),
           iconColor: Colors.white,
         );
-      return;  // Exit the function if no internet
-    }
+        return; // Exit the function if no internet
+      }
       setState(() {
         isLoading = true;
       });
@@ -256,6 +257,7 @@ class _AddeducationState extends State<Addeducation> {
       statusBarIconBrightness: Brightness.light,
     ));
     return Scaffold(
+      backgroundColor: Color(0xffFCFCFC),
       body: Column(
         children: [
           Container(
@@ -324,13 +326,18 @@ class _AddeducationState extends State<Addeducation> {
                   SizedBox(
                     height: 25,
                   ),
-                  Text(
-                    'Qualification',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff333333)),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.015,
+                    ),
+                    child: Text(
+                      'Qualification',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff333333)),
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -382,12 +389,17 @@ class _AddeducationState extends State<Addeducation> {
                   SizedBox(
                     height: 25,
                   ),
-                  Text(
-                    'Specialization',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                        color: Color(0xff333333)),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.015,
+                    ),
+                    child: Text(
+                      'Specialization',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          color: Color(0xff333333)),
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -441,12 +453,17 @@ class _AddeducationState extends State<Addeducation> {
                   SizedBox(
                     height: 25,
                   ),
-                  Text(
-                    'Institute name',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                        color: Color(0xff333333)),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.015,
+                    ),
+                    child: Text(
+                      'Institute name',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          color: Color(0xff333333)),
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -613,12 +630,17 @@ class _AddeducationState extends State<Addeducation> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Start Date',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'Lato',
-                                  color: Color(0xff333333)),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width * 0.015,
+                              ),
+                              child: Text(
+                                'Start Date',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Lato',
+                                    color: Color(0xff333333)),
+                              ),
                             ),
                             SizedBox(
                               height: 10,
@@ -693,12 +715,17 @@ class _AddeducationState extends State<Addeducation> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'End Date',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'Lato',
-                                  color: Color(0xff333333)),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width * 0.015,
+                              ),
+                              child: Text(
+                                'End Date',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Lato',
+                                    color: Color(0xff333333)),
+                              ),
                             ),
                             SizedBox(
                               height: 10,
@@ -782,12 +809,17 @@ class _AddeducationState extends State<Addeducation> {
                   SizedBox(
                     height: 25,
                   ),
-                  Text(
-                    'Education type',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                        color: Color(0xff333333)),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.015,
+                    ),
+                    child: Text(
+                      'Education type',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          color: Color(0xff333333)),
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -806,15 +838,32 @@ class _AddeducationState extends State<Addeducation> {
                     child: InkWell(
                       onTap: () {
                         showMaterialModalBottomSheet(
+                          backgroundColor: Color(0x00000000),
                           isDismissible: true,
                           context: context,
                           builder: (context) => Container(
                             padding: EdgeInsets.symmetric(
                                 vertical: 30, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Color(0xffFCFCFC),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(25),
+                                topRight: Radius.circular(25),
+                              ),
+                            ),
                             width: MediaQuery.of(context).size.width,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.25,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black, // Adjust color
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                                 ListTile(
                                   //leading: Icon(Icons.visibility_outlined),
                                   title: Text('Full time'),
