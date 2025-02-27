@@ -1,2 +1,0 @@
-D:/MobileApp/Talenturbo-mobapp/android/app/.cxx/Debug/3v3794y6/armeabi-v7a/CMakeFiles/edit_cache.dir
-D:/MobileApp/Talenturbo-mobapp/android/app/.cxx/Debug/3v3794y6/armeabi-v7a/CMakeFiles/rebuild_cache.dir

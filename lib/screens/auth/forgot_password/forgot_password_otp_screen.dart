@@ -4,8 +4,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 import 'package:talent_turbo_new/AppColors.dart';
@@ -118,6 +116,7 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
       });
     }
   }
+  
 
   Future<void> sendPasswordRestOTP() async {
     final url = Uri.parse(AppConstants.BASE_URL + AppConstants.FORGOT_PASSWORD);
@@ -243,6 +242,7 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                         fontSize: 20,
                         fontWeight: FontWeight.bold),
                   )),
+
                   SizedBox(
                     height: 40,
                   ),
@@ -257,6 +257,7 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                           fontFamily: 'Lato'),
                     ),
                   ),
+
                   SizedBox(
                     height: 40,
                   ),
@@ -305,6 +306,7 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                     otpPinFieldDecoration:
                         OtpPinFieldDecoration.underlinedPinBoxDecoration,
                   ),
+
                   inValidOTP
                       ? Row(
                           children: [
@@ -321,6 +323,28 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                           ],
                         )
                       : Container(),
+
+                  //Loading
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: Visibility(
+                        visible: isLoading,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 30,
+                            ),
+                            LoadingAnimationWidget.fourRotatingDots(
+                              color: AppColors.primaryColor,
+                              size: 40,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                   SizedBox(height: 50),
                   InkWell(
                     onTap: () {
@@ -345,41 +369,14 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                           color: AppColors.primaryColor,
                           borderRadius: BorderRadius.circular(10)),
                       child: Center(
-                        child: isLoading
-                            ? SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: TweenAnimationBuilder<double>(
-                                  tween: Tween<double>(begin: 0, end: 5),
-                                  duration: Duration(seconds: 2),
-                                  curve: Curves.linear,
-                                  builder: (context, value, child) {
-                                    return Transform.rotate(
-                                      angle: value *
-                                          2 *
-                                          3.1416, // Full rotation effect
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 4,
-                                        value: 0.20, // 1/5 of the circle
-                                        backgroundColor: const Color.fromARGB(
-                                            142, 234, 232, 232), // Grey stroke
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(Colors
-                                                .white), // White rotating stroke
-                                      ),
-                                    );
-                                  },
-                                  onEnd: () =>
-                                      {}, // Ensures smooth infinite animation
-                                ),
-                              )
-                            : Text(
-                                'Verify',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                        child: Text(
+                          'Verify',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                   ),
+
                   SizedBox(
                     height: 60,
                   ),
@@ -410,6 +407,7 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
                           )),
                     ],
                   ),
+
                   SizedBox(
                     height: 30,
                   ),
