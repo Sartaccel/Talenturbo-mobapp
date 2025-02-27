@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:talent_turbo_new/AppColors.dart';
 import 'package:talent_turbo_new/AppConstants.dart';
@@ -53,77 +52,60 @@ class _HomeFragmentState extends State<HomeFragment>
   List<Job> parseJobs(List<dynamic> jsonList) {
     return jsonList.map((json) => Job.fromJson(json)).toList();
   }
-  Future<void> loadCachedJobs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? jobListString = prefs.getString('jobList');
 
-    if (jobListString != null) {
-      List<dynamic> cachedJobs = jsonDecode(jobListString);
+  Future<void> saveJob(int jobId, int status) async {
+    //final url = Uri.parse(AppConstants.BASE_URL + AppConstants.SAVE_JOB_TO_FAV);
+    final url =
+        Uri.parse(AppConstants.BASE_URL + AppConstants.SAVE_JOB_TO_FAV_NEW);
+
+    final bodyParams = {"jobId": jobId, "isSaved": status};
+
+    try {
       setState(() {
-        jobList = cachedJobs;
-        isLoading = false;
+        isLoading = true;
       });
-    }
-  }
 
-// 🔹 Helper function for showing snack bars
-void _showSnackBar(BuildContext context, String message, Color color) {
-  IconSnackBar.show(
-    context,
-    label: message,
-    snackBarType: color == Colors.green ? SnackBarType.success : SnackBarType.fail,
-    backgroundColor: color,
-    iconColor: Colors.white,
-  );
-}
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': retrievedUserData!.token
+        },
+        body: jsonEncode(bodyParams),
+      );
 
-Future<bool> saveJob(int jobId, int status) async {
-  final url = Uri.parse(AppConstants.BASE_URL + AppConstants.SAVE_JOB_TO_FAV_NEW);
-  final bodyParams = {"jobId": jobId, "isFavorite": status};
+      if (kDebugMode) {
+        print(
+            'Response code ${response.statusCode} :: Response => ${response.body}');
+      }
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': retrievedUserData?.token ?? '',
-      },
-      body: jsonEncode(bodyParams),
-    );
-
-    if (kDebugMode) {
-      print('Response code: ${response.statusCode} :: Response => ${response.body}');
-    }
-
-    if (response.statusCode == 200 || response.statusCode == 202) {
-      if (mounted) {
-        _showSnackBar(
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        // Fluttertoast.showToast(
+        //     msg: status == 1 ? 'Saved successfully' : 'Removed Successfully',
+        //     toastLength: Toast.LENGTH_SHORT,
+        //     gravity: ToastGravity.BOTTOM,
+        //     timeInSecForIosWeb: 1,
+        //     backgroundColor: const Color(0xff2D2D2D),
+        //     textColor: Colors.white,
+        //     fontSize: 16.0);
+        IconSnackBar.show(
           context,
-          status == 1 ? 'Saved successfully' : 'Removed successfully',
-          Colors.green,
+          label: status == 1 ? 'Saved successfully' : 'Removed Successfully',
+          snackBarType: SnackBarType.alert,
+          backgroundColor: Color(0xff2D2D2D),
+          iconColor: Colors.white,
         );
+        setState(() {
+          jobSearchTerm = "";
+          fetchAllJobs();
+        });
       }
-      return true; // ✅ Return success
-    } else {
-      if (mounted) {
-        _showSnackBar(context, 'Something went wrong. Please try again.', Colors.red);
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
       }
-      return false; // ❌ Return failure
     }
-  } catch (e) {
-    if (kDebugMode) print("Error: $e");
-
-    if (mounted) {
-      _showSnackBar(context, 'Network error. Please check your connection.', Colors.red);
-    }
-    return false; // ❌ Return failure
   }
-}
-
-
-
-
-
 
   Future<void> fetchAllJobs() async {
     final url = Uri.parse(AppConstants.BASE_URL + AppConstants.ALL_JOBS_LIST);
@@ -278,31 +260,33 @@ Future<bool> saveJob(int jobId, int status) async {
                                       });
                                       //await saveStringToPreferences("search", "");
                                     },
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SvgPicture.asset(
-                                          'assets/icon/Search.svg',
-                                          width: 26,
-                                          height: 26,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Flexible(
-                                          child: Text(
-                                            jobSearchTerm.isEmpty
-                                                ? 'Search for jobs or skills'
-                                                : jobSearchTerm,
-                                            style: TextStyle(
-                                                color: Color(0xff7D7C7C)),
-                                            overflow: TextOverflow
-                                                .ellipsis, // Add this line to handle overflow
-                                            maxLines:
-                                                1, // Optional: Limits text to a single line
+                                    child: Expanded(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icon/Search.svg',
+                                            width: 26,
+                                            height: 26,
                                           ),
-                                        )
-                                      ],
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Flexible(
+                                            child: Text(
+                                              jobSearchTerm.isEmpty
+                                                  ? 'Search for jobs or skills'
+                                                  : jobSearchTerm,
+                                              style: TextStyle(
+                                                  color: Color(0xff7D7C7C)),
+                                              overflow: TextOverflow
+                                                  .ellipsis, // Add this line to handle overflow
+                                              maxLines:
+                                                  1, // Optional: Limits text to a single line
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -323,7 +307,6 @@ Future<bool> saveJob(int jobId, int status) async {
                             ),
                           ),
                         ),
-                        
                         InkWell(
                           onTap: () {
                             Navigator.push(
@@ -337,8 +320,8 @@ Future<bool> saveJob(int jobId, int status) async {
                               jobSearchTerm.isEmpty
                                   ? SvgPicture.asset(
                                       'assets/icon/Notifi.svg',
-                                      width: 28,
-                                      height: 28,
+                                      width: 30,
+                                      height: 30,
                                     )
                                   : SizedBox(
                                       width: 26,
@@ -412,7 +395,7 @@ Future<bool> saveJob(int jobId, int status) async {
             top: 120,
             left: 0,
             right: 0,
-            bottom: 80,
+            bottom: MediaQuery.of(context).size.height * 0.07,
             child: Container(
               width: MediaQuery.of(context).size.width,
               child: Column(
@@ -420,49 +403,47 @@ Future<bool> saveJob(int jobId, int status) async {
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //Text('Hi, ${referralData?.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff333333)),),
-                          Text(
-                            'Hi, ${candidateProfileModel?.candidateName}',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xff333333)),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              /* Container(
-                                  width: 200,
-                                  child: Flexible(fit: FlexFit.loose ,child: Text(maxLines: 1, overflow: TextOverflow.ellipsis, jobSearchTerm.isEmpty?'Recent job list' : 'Search results for ${jobSearchTerm}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff333333)),))
-                              ),*/
-                      
-                              Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Text(
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    jobSearchTerm.isEmpty
-                                        ? 'Recent job list'
-                                        : 'Search results for ${jobSearchTerm}',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff333333)),
-                                  ))
-                            ],
-                          ),
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //Text('Hi, ${referralData?.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff333333)),),
+                        Text(
+                          'Hi, ${candidateProfileModel?.candidateName}',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff333333)),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            /* Container(
+                                width: 200,
+                                child: Flexible(fit: FlexFit.loose ,child: Text(maxLines: 1, overflow: TextOverflow.ellipsis, jobSearchTerm.isEmpty?'Recent job list' : 'Search results for ${jobSearchTerm}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff333333)),))
+                            ),*/
+
+                            Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  jobSearchTerm.isEmpty
+                                      ? 'Recent job list'
+                                      : 'Search results for ${jobSearchTerm}',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff333333)),
+                                ))
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  isLoading 
+                  isLoading
                       ? Expanded(
                           child: Shimmer.fromColors(
                             baseColor:
@@ -539,8 +520,9 @@ Future<bool> saveJob(int jobId, int status) async {
                                     padding: EdgeInsets.all(15),
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            width: 0.2, color: Colors.grey),
-                                        color: Colors.white),
+                                            width: 0.2,
+                                            color: Color(0xffE6E6E6)),
+                                        color: Color(0xffFCFCFC)),
                                     width: MediaQuery.of(context).size.width,
                                     height: 160,
                                     child: Row(
@@ -565,9 +547,7 @@ Future<bool> saveJob(int jobId, int status) async {
                                                   .isFirst, // This will keep Screen 1
                                             );
 
-                                           // fetchAllJobs();
-                                            loadCachedJobs();
-
+                                            fetchAllJobs();
                                           },
                                           child: Row(
                                             crossAxisAlignment:
@@ -805,52 +785,47 @@ Future<bool> saveJob(int jobId, int status) async {
                                           ),
                                         ),
                                         InkWell(
- onTap: () async {
-  bool isSaved = (jobList[index]['isFavorite'] == "1"); // Convert to boolean
-  int? jobId = jobList[index]['jobId'] ?? jobList[index]['id']; // Get job ID
-
-  if (kDebugMode) {
-    print('Status before tap: $isSaved');
-  }
-
-  if (jobId != null) {
-    setState(() {
-      jobList[index]['isFavorite'] = isSaved ? "0" : "1"; // Optimistic UI update
-    });
-
-    bool success = await saveJob(jobId, isSaved ? 0 : 1); // API call
-
-    if (!success) {
-      // Revert UI if API call fails
-      setState(() {
-        jobList[index]['isFavorite'] = isSaved ? "1" : "0";
-      });
-    }
-  } else {
-    if (kDebugMode) {
-      print("Error: Job ID is null");
-    }
-  }
-},
-
-  child: Icon(
-    (jobList[index]['isFavorite'] == "1") ? Icons.bookmark : Icons.bookmark_border_rounded,
-    size: 25,
-  ),
-),
-
-
-           
+                                          onTap: () {
+                                            bool isSaved = jobList[index]
+                                                    ['isSaved'] ??
+                                                false;
+                                            if (kDebugMode) {
+                                              print('Status: ${isSaved}');
+                                            }
+                                            saveJob(jobList[index]['id'],
+                                                isSaved ? 0 : 1);
+                                          },
+                                          child: Icon(
+                                            (jobList[index]['isSaved'] ??
+                                                    false) // Use the correct value for 'isSaved'
+                                                ? Icons.bookmark
+                                                : Icons.bookmark_border_rounded,
+                                            size: 25,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   );
                                 },
                               ),
-                            )
-                            ): Expanded(
-                              
+                            ))
+                          : isConnectionAvailable
+                              ? SizedBox(
+                                  height: 500,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Center(
+                                      child: Text(
+                                        'No Jobs Here ${jobSearchTerm}',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Expanded(
                                   child: Center(
-                                    
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -913,26 +888,30 @@ Future<bool> saveJob(int jobId, int status) async {
     );
   }
 
-  
   @override
-void initState() {
-  super.initState();
-  fetchUserDataFromPref();
-}
+  void initState() {
+    // TODO: implement initState
 
-Future<void> fetchUserDataFromPref() async {
-  UserData? _retrievedUserData = await getUserData();
-  CandidateProfileModel? _candidateProfileModel = await getCandidateProfileData();
-
-  setState(() {
-    retrievedUserData = _retrievedUserData;
-    candidateProfileModel = _candidateProfileModel;
-    
+    super.initState();
+    fetchUserDataFromPref();
     if (kDebugMode) {
-      print("User Email: ${retrievedUserData?.email}");
+      print(retrievedUserData?.email);
     }
+  }
 
-    fetchAllJobs(); // Fetch jobs after retrieving user data
-  });
+  Future<void> fetchUserDataFromPref() async {
+    UserData? _retrievedUserData = await getUserData();
+    //ReferralData? _referralData = await getReferralProfileData();
+    CandidateProfileModel? _candidateProfileModel =
+        await getCandidateProfileData();
+
+    setState(() {
+      retrievedUserData = _retrievedUserData;
+      candidateProfileModel = _candidateProfileModel;
+      //referralData = _referralData;
+      //print(retrievedUserData?.email);
+
+      fetchAllJobs();
+    });
+  }
 }
-    }
