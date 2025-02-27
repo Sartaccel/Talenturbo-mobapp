@@ -1,8 +1,8 @@
 class AppConstants {
   static const String BASE_URL = "https://mobileapi.talentturbo.us";
-
+                                                                                                                                                                            
   static String APP_NAME = 'talent_turbo_referral';
-
+                                                                                      
   static String LOGIN = "/api/v1/userresource/authenticate";
   static String SOCIAL_LOGIN = "/api/v1/userresource/social/authenticate";
   static String LOGIN_BY_MOBILE =
