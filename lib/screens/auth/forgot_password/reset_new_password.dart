@@ -28,8 +28,8 @@ class _ResetNewPasswordState extends State<ResetNewPassword> {
   bool _isConfirmPasswordValid = true;
   TextEditingController confirmPasswordController = TextEditingController();
   bool confirmPasswordHide = true, passwordHide = true;
-  String confirm_passwordErrorMSG = "Password cannot be empty";
-  String passwordErrorMSG = "Password cannot be empty";
+  String confirm_passwordErrorMSG = "Password is required";
+  String passwordErrorMSG = "Password is required";
 
   Future<void> setNewPassword() async {
   final url = Uri.parse(
